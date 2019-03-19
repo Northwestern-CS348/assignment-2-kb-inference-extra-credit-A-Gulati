@@ -143,6 +143,68 @@ class KnowledgeBase(object):
         ####################################################
         # Student code goes here
 
+        #instantiate output string for maximum scope
+        output=""
+        #if flag is False, fact_or_rule is Rule, else Fact
+        myflag = isinstance(fact_or_rule, Fact)
+
+        #----------------------------------------------------
+        #im dealing with a fact
+        if myflag:
+            if fact_or_rule in self.facts:
+                if fact_or_rule.asserted:
+                    output+="fact: "
+                    output+=str(fact_or_rule.statement)
+                    snum = len(fact_or_rule.supported_by)
+                    if snum > 0:
+                        sp = [self.kb_helper(x) for x in fact_or_rule.supported_by]
+                        output+="\n SUPPORTED BY"
+                        for i in sp: output+=i
+                    return output
+            else:
+                output+="Fact is not in the KB"
+                return output
+
+        #----------------------------------------------------
+        #im dealing with a rule
+        if not(myflag):
+            if fact_or_rule in self.rules:
+                if fact_or_rule.asserted:
+                    tmp=str(fact_or_rule.rhs)
+                    snum=len(fact_or_rule.supported_by)
+                    output+="rule: ("
+                    output+=self.rule_helper(fact_or_rule)
+                    output+=") ->"
+                    output+=tmp
+                    output+=" ASSERTED"
+                    if snum > 0:
+                        sp = [self.kb_helper(x) for x in fact_or_rule.supported_by]
+                        output+="\n SUPPORTED BY"
+                        for i in sp: output+=i
+                    return output
+                else:
+                    snum=len(fact_or_rule.supported_by)
+                    output+="rule: ("
+                    output+=self.rule_helper(fact_or_rule)
+                    output+=") ->"
+                    output+=tmp
+                    if snum > 0:
+                        sp = [self.kb_helper(x) for x in fact_or_rule.supported_by]
+                        output+="\n SUPPORTED BY"
+                        for i in sp: output+=i
+                    return output
+
+
+            else:
+                output+="Rule is not in the KB"
+                return output
+
+        #----------------------------------------------------
+
+        return output
+
+
+
 
 class InferenceEngine(object):
     def fc_infer(self, fact, rule, kb):
@@ -154,7 +216,7 @@ class InferenceEngine(object):
             kb (KnowledgeBase) - A KnowledgeBase
 
         Returns:
-            Nothing            
+            Nothing
         """
         printv('Attempting to infer from {!r} and {!r} => {!r}', 1, verbose,
             [fact.statement, rule.lhs, rule.rhs])
